@@ -1,10 +1,11 @@
-# Generated dataset and experiment outputs: reproduce with `make all`.
+# Generated dataset and intermediate images: reproduce with `make all`.
+# results/ is deliberately tracked instead, so the report, tables and figures
+# can be read straight from the repository without a full 28-minute re-run.
+# Because the run is seeded, regenerating them should produce no diff.
 data/*
 !data/.gitkeep
 outputs/*
 !outputs/.gitkeep
-results/*
-!results/.gitkeep
 
 # Python
 __pycache__/

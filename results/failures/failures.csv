@@ -1,0 +1,7 @@
+rank,doc_id,doc_type,degradation,level,method,cer,wer,baseline_cer,figure
+1,doc_018,invoice,blur,3,pipeline_full,0.044444444444444446,0.25892857142857145,0.0,results/failures/01_doc_018__blur__3.png
+2,doc_052,invoice,blur,3,pipeline_full,0.03680981595092025,0.21428571428571427,0.0,results/failures/02_doc_052__blur__3.png
+3,doc_002,invoice,blur,3,pipeline_full,0.032490974729241874,0.21739130434782608,0.0,results/failures/03_doc_002__blur__3.png
+4,doc_008,invoice,blur,3,pipeline_full,0.03190184049079755,0.20175438596491227,0.001226993865030675,results/failures/04_doc_008__blur__3.png
+5,doc_048,invoice,blur,3,pipeline_full,0.03170731707317073,0.23684210526315788,0.0,results/failures/05_doc_048__blur__3.png
+6,doc_006,invoice,blur,3,pipeline_full,0.03170731707317073,0.21238938053097345,0.0,results/failures/06_doc_006__blur__3.png
