@@ -12,3 +12,6 @@ pyyaml==6.0.3
 tqdm==4.70.1
 pytest==9.2.0
 ruff==0.17.4
+
+# Optional: only needed for the live demo UI (`make demo`), not for `make all`.
+# flask==3.1.3

@@ -49,10 +49,10 @@ def degraded_filename(doc_id: str, degradation: str, level: int) -> str:
     return f"{doc_id}{_FILENAME_SEPARATOR}{degradation}{_FILENAME_SEPARATOR}{level}.png"
 
 
-def _derive_seed(
+def derive_variant_rng(
     global_seed: int, doc_id: str, degradation: str, level: int
 ) -> np.random.Generator:
-    """Derive a stable per-variant random generator.
+    """Derive the stable random generator for one degraded variant.
 
     ``hash()`` is salted per process, so CRC32 is used instead to keep seeds
     identical across runs and machines.
@@ -168,7 +168,7 @@ def build_degraded_corpus(config: Config, show_progress: bool = True) -> pd.Data
             image_path = source
         else:
             image = read_image(source)
-            rng = _derive_seed(config.seed, doc_id, degradation, level)
+            rng = derive_variant_rng(config.seed, doc_id, degradation, level)
             params = config.degradations[degradation].params_for(level)
             degraded = apply_degradation(degradation, image, rng, params)
             image_path = config.paths.degraded_dir / degraded_filename(doc_id, degradation, level)

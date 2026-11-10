@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocuLens live demo</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="bar">
+  <div>
+    <h1>DocuLens</h1>
+    <p class="sub">Classical DIP preprocessing for OCR of insurance claim documents</p>
+  </div>
+  <div class="engine" id="engine"></div>
+</header>
+
+<main>
+  <section class="controls" aria-label="Controls">
+    <div class="field">
+      <label for="doc">Document</label>
+      <select id="doc"></select>
+    </div>
+    <div class="field">
+      <label for="degradation">Degradation</label>
+      <select id="degradation"></select>
+    </div>
+    <div class="field">
+      <label for="level">Severity</label>
+      <select id="level"></select>
+    </div>
+    <div class="field">
+      <label for="pipeline">Pipeline</label>
+      <select id="pipeline"></select>
+    </div>
+    <button id="run" class="run">Run pipeline</button>
+    <div class="field upload">
+      <label for="file">…or try your own page</label>
+      <input type="file" id="file" accept="image/*">
+    </div>
+  </section>
+
+  <p id="status" class="status" role="status"></p>
+
+  <section id="scoreboard" class="scoreboard" hidden aria-label="Results">
+    <article class="card baseline">
+      <h2>Baseline <span class="tag">no preprocessing</span></h2>
+      <div class="metrics">
+        <div class="metric"><span class="val" id="base-cer">–</span><span class="key">CER</span></div>
+        <div class="metric"><span class="val" id="base-wer">–</span><span class="key">WER</span></div>
+        <div class="metric"><span class="val sm" id="base-ms">–</span><span class="key">OCR ms</span></div>
+      </div>
+    </article>
+    <div class="arrow" id="verdict"><span id="verdict-text">→</span></div>
+    <article class="card pipeline">
+      <h2 id="pipeline-title">Pipeline</h2>
+      <div class="metrics">
+        <div class="metric"><span class="val" id="pipe-cer">–</span><span class="key">CER</span></div>
+        <div class="metric"><span class="val" id="pipe-wer">–</span><span class="key">WER</span></div>
+        <div class="metric"><span class="val sm" id="pipe-ms">–</span><span class="key">OCR ms</span></div>
+      </div>
+    </article>
+  </section>
+
+  <section id="stages-wrap" hidden>
+    <h3>Stage by stage <span class="hint" id="condition"></span></h3>
+    <div class="filmstrip" id="stages"></div>
+  </section>
+
+  <section id="text-wrap" class="texts" hidden>
+    <article>
+      <h3>Ground truth</h3>
+      <pre id="gt"></pre>
+    </article>
+    <article>
+      <h3>Baseline OCR</h3>
+      <pre id="base-text"></pre>
+    </article>
+    <article>
+      <h3 id="pipe-text-title">Pipeline OCR</h3>
+      <pre id="pipe-text"></pre>
+    </article>
+  </section>
+</main>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="close" id="lightbox-close" aria-label="Close">×</button>
+  <figcaption id="lightbox-caption"></figcaption>
+  <img id="lightbox-img" alt="">
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -14,9 +14,10 @@ DOCULENS    := $(VENV)/bin/doculens
 CONFIG      ?= configs/default.yaml
 JOBS        ?=
 JOBS_FLAG   := $(if $(JOBS),--jobs $(JOBS),)
+PORT        ?= 8000
 
 .DEFAULT_GOAL := help
-.PHONY: help setup data generate degrade run ablate report test lint format all clean clean-results
+.PHONY: help setup data generate degrade run ablate report demo test lint format all clean clean-results
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -57,6 +58,10 @@ report: ## Write tables, charts and figures from existing results
 
 all: ## Full reproduction: data, evaluation, ablation, failures and report
 	$(DOCULENS) -c $(CONFIG) all $(JOBS_FLAG)
+
+demo: ## Serve the live demo UI at http://127.0.0.1:$(PORT)
+	@$(PYTHON) -c "import flask" 2>/dev/null || $(PIP) install flask
+	$(PYTHON) demo/app.py -c $(CONFIG) --port $(PORT)
 
 test: ## Run the test suite
 	$(PYTHON) -m pytest

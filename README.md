@@ -196,6 +196,43 @@ make clean   # delete the generated dataset and results
 
 ---
 
+---
+
+## Live demo UI
+
+For presenting the pipeline interactively rather than through static figures:
+
+```bash
+make demo          # http://127.0.0.1:8000  (installs flask on first run)
+make demo PORT=9000
+```
+
+Pick a document, a degradation and a severity, choose a pipeline, and hit **Run**.
+Each run (~1 s) shows:
+
+- **The scoreboard** — raw-baseline CER/WER beside the pipeline's, with the verdict
+  coloured green or red. This is the whole project in one glance, and it will
+  honestly go red on a clean page.
+- **The stage filmstrip** — every intermediate image, labelled with the stage name
+  and its parameters. Click any frame to enlarge it full-screen (Esc to close);
+  this is the best way to show the shadow gradient surviving to `deskew` and
+  disappearing at `adaptive_threshold`.
+- **Three transcripts** — ground truth, baseline OCR and pipeline OCR, normalised
+  exactly as the metrics see them, so the specific character confusions are
+  readable.
+
+You can also upload your own page. There is no ground truth for an uploaded image,
+so CER and WER show `n/a` and only the transcripts and stage images are produced.
+
+The demo is a **presentation harness, not part of the graded pipeline**: it lives
+in `demo/`, adds no image-processing logic, and calls the same registry, `Pipeline`,
+`OCREngine` and `metrics.score` the evaluation uses. That it can be this thin is
+the architectural point — those functions take plain images and return plain
+values, which is also what the future MCP tool layer needs.
+
+Flask is the only extra dependency and is deliberately kept out of
+`requirements.txt`, so `make all` never needs it.
+
 ## Dataset
 
 Real claim documents cannot be published with a course report, and scanned
@@ -381,6 +418,7 @@ src/doculens/
   extraction/ rag/ services/    STUBS ONLY - see docs/EXTENDING.md
 configs/default.yaml            every tunable value in the project
 scripts/tune_pipeline.py        train-split parameter sweep
+demo/                           live demo UI (presentation only, not graded)
 tests/                          pytest suite
 ```
 
