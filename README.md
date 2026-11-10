@@ -207,8 +207,48 @@ make demo          # http://127.0.0.1:8000  (installs flask on first run)
 make demo PORT=9000
 ```
 
-Pick a document, a degradation and a severity, choose a pipeline, and hit **Run**.
-Each run (~1 s) shows:
+The page has two tabs.
+
+### Upload images (default tab)
+
+Drop in one or more document images, choose a pipeline and press **Run full
+pipeline**. Each file is processed in about 1.3 s and its row appears as it
+finishes, so a batch fills in live. The result is:
+
+- **A results table** — one row per file with baseline CER, pipeline CER, the
+  signed delta, baseline and pipeline OCR confidence, words read, preprocessing
+  time and a green/red verdict, plus a mean row across the batch. **Download
+  results CSV** saves exactly those numbers.
+- **A per-file breakdown** — click any row (or the file's heading) to open its
+  scoreboard, its full stage filmstrip and its three transcripts.
+
+Two kinds of metric appear there, and the distinction matters:
+
+| | needs ground truth | what it measures |
+| --- | --- | --- |
+| **CER / WER** | yes | edit distance to the exact reference text |
+| **OCR confidence** | no | how sure Tesseract is, *not* how right it is |
+
+A file whose name follows the corpus convention — `doc_002.png` or
+`doc_002__lowlight__3.png` — is recognised as a page this project generated, so
+its reference text is loaded from disk and CER is exact. Any other image is
+marked `no ground truth`, its CER columns show `—`, and only confidence, word
+count and the stage images describe it. Confidence is never used to choose a
+pipeline or quoted as a stand-in for CER: a confidently misread word scores
+high.
+
+For a live demonstration with real numbers, upload straight out of
+`data/degraded/` (for example `doc_002__lowlight__3.png`,
+`doc_008__skew__2.png`, `doc_018__blur__3.png`): the names match, so every row is
+scored, and `doc_018__blur__3.png` is one of the six worst cases in
+`results/REPORT.md` — a useful thing to be the one to point out.
+
+### Controlled corpus
+
+Pick a generated document, a degradation and a severity, choose a pipeline and
+hit **Run**. This is the measured path — the degradation is applied with the same
+seeded RNG the corpus used, so the CER shown for, say, `doc_002` / lowlight / 3
+is the same number that image contributes to `results/results_long.csv`. It shows:
 
 - **The scoreboard** — raw-baseline CER/WER beside the pipeline's, with the verdict
   coloured green or red. This is the whole project in one glance, and it will
@@ -220,9 +260,6 @@ Each run (~1 s) shows:
 - **Three transcripts** — ground truth, baseline OCR and pipeline OCR, normalised
   exactly as the metrics see them, so the specific character confusions are
   readable.
-
-You can also upload your own page. There is no ground truth for an uploaded image,
-so CER and WER show `n/a` and only the transcripts and stage images are produced.
 
 The demo is a **presentation harness, not part of the graded pipeline**: it lives
 in `demo/`, adds no image-processing logic, and calls the same registry, `Pipeline`,

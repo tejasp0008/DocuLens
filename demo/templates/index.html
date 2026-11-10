@@ -15,7 +15,72 @@
   <div class="engine" id="engine"></div>
 </header>
 
+<nav class="tabs" role="tablist">
+  <button class="tab active" id="tab-upload" role="tab" aria-selected="true">Upload images</button>
+  <button class="tab" id="tab-corpus" role="tab" aria-selected="false">Controlled corpus</button>
+</nav>
+
 <main>
+
+<!-- ============================ UPLOAD MODE ============================ -->
+<section id="view-upload">
+  <div class="dropzone" id="dropzone" tabindex="0" role="button"
+       aria-label="Choose or drop document images">
+    <strong>Drop claim documents here</strong>
+    <span>or click to choose files &middot; PNG / JPG / TIFF &middot; several at once</span>
+    <input type="file" id="files" accept="image/*" multiple hidden>
+  </div>
+
+  <div class="queue" id="queue" hidden>
+    <ul id="queue-list"></ul>
+    <div class="queue-actions">
+      <div class="field">
+        <label for="up-pipeline">Pipeline</label>
+        <select id="up-pipeline"></select>
+      </div>
+      <button id="up-run" class="run">Run full pipeline</button>
+      <button id="up-clear" class="ghost">Clear</button>
+    </div>
+  </div>
+
+  <p id="up-status" class="status" role="status">
+    Add one or more document images, then run the pipeline.
+  </p>
+
+  <section id="up-summary-wrap" hidden>
+    <div class="section-head">
+      <h3>Final results</h3>
+      <button id="up-csv" class="ghost">Download results CSV</button>
+    </div>
+    <div class="table-scroll">
+      <table class="results" id="up-summary">
+        <thead>
+          <tr>
+            <th>file</th>
+            <th>size</th>
+            <th class="num">baseline CER</th>
+            <th class="num">pipeline CER</th>
+            <th class="num">&Delta; CER</th>
+            <th class="num">baseline conf</th>
+            <th class="num">pipeline conf</th>
+            <th class="num">&Delta; conf</th>
+            <th class="num">words read</th>
+            <th class="num">preprocess ms</th>
+            <th>verdict</th>
+          </tr>
+        </thead>
+        <tbody id="up-rows"></tbody>
+        <tfoot id="up-foot"></tfoot>
+      </table>
+    </div>
+    <p class="note" id="up-note"></p>
+  </section>
+
+  <div id="up-details"></div>
+</section>
+
+<!-- ============================ CORPUS MODE ============================ -->
+<section id="view-corpus" hidden>
   <section class="controls" aria-label="Controls">
     <div class="field">
       <label for="doc">Document</label>
@@ -34,10 +99,6 @@
       <select id="pipeline"></select>
     </div>
     <button id="run" class="run">Run pipeline</button>
-    <div class="field upload">
-      <label for="file">…or try your own page</label>
-      <input type="file" id="file" accept="image/*">
-    </div>
   </section>
 
   <p id="status" class="status" role="status"></p>
@@ -81,6 +142,8 @@
       <pre id="pipe-text"></pre>
     </article>
   </section>
+</section>
+
 </main>
 
 <div class="lightbox" id="lightbox" hidden>

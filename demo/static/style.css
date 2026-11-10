@@ -15,6 +15,12 @@
 
 * { box-sizing: border-box; }
 
+/* The `hidden` attribute must win over the class rules below. A class selector
+   such as .lightbox{display:flex} otherwise beats the browser's own
+   [hidden]{display:none}, which would leave the full-screen lightbox overlay
+   covering the page from the moment it loads. */
+[hidden] { display: none !important; }
+
 body {
   margin: 0;
   background: var(--surface);
@@ -44,8 +50,6 @@ select, input[type=file] {
   font-size: 15px; padding: 9px 11px; border: 1px solid var(--line);
   border-radius: 8px; background: var(--surface); color: var(--ink); min-width: 168px;
 }
-.upload { margin-left: auto; }
-
 .run {
   font-size: 16px; font-weight: 650; padding: 11px 22px; border: 0; border-radius: 8px;
   background: var(--blue); color: #fff; cursor: pointer;
@@ -124,9 +128,109 @@ h3 { font-size: 16px; margin: 0 0 12px; }
   color: #fff; font-size: 40px; line-height: 1; cursor: pointer;
 }
 
+/* ---------------------------------------------------------------- tabs */
+.tabs {
+  display: flex; gap: 4px; padding: 0 28px; background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.tab {
+  background: none; border: 0; border-bottom: 3px solid transparent; cursor: pointer;
+  font-size: 15px; font-weight: 600; color: var(--muted); padding: 12px 16px;
+}
+.tab:hover { color: var(--ink-2); }
+.tab.active { color: var(--blue); border-bottom-color: var(--blue); }
+
+/* ------------------------------------------------------- upload mode */
+.dropzone {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  background: var(--panel); border: 2px dashed var(--line); border-radius: var(--radius);
+  padding: 34px 20px; cursor: pointer; text-align: center;
+}
+.dropzone:hover, .dropzone:focus-visible, .dropzone.over {
+  border-color: var(--blue); background: #f4f8fd; outline: none;
+}
+.dropzone strong { font-size: 18px; }
+.dropzone span { color: var(--muted); font-size: 13.5px; }
+
+.queue {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  margin-top: 14px; padding: 12px 16px;
+}
+.queue ul { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.queue li {
+  display: flex; align-items: center; gap: 8px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 999px; padding: 5px 6px 5px 12px;
+  font-size: 13px; font-family: ui-monospace, Menlo, Consolas, monospace;
+}
+.queue .x {
+  border: 0; background: none; color: var(--muted); font-size: 18px; line-height: 1;
+  cursor: pointer; padding: 0 4px;
+}
+.queue .x:hover { color: var(--red); }
+.queue-actions { display: flex; gap: 14px; align-items: end; flex-wrap: wrap; }
+
+.ghost {
+  font-size: 14px; font-weight: 600; padding: 10px 16px; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink-2);
+}
+.ghost:hover { border-color: var(--blue); color: var(--blue); }
+
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.section-head h3 { margin: 0; }
+
+/* ------------------------------------------------------ results table */
+.table-scroll {
+  overflow-x: auto; background: var(--panel); border: 1px solid var(--line);
+  border-radius: var(--radius); margin-top: 10px;
+}
+table.results { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+table.results th, table.results td {
+  padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap;
+}
+table.results thead th {
+  font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted);
+  font-weight: 600; background: var(--surface); position: sticky; top: 0;
+}
+table.results td.num, table.results th.num { text-align: right; font-variant-numeric: tabular-nums; }
+table.results td.file { font-weight: 600; max-width: 330px; overflow: hidden; text-overflow: ellipsis; }
+table.results td.dim { color: var(--muted); }
+table.results tbody tr { cursor: pointer; }
+table.results tbody tr:hover { background: #f4f8fd; }
+table.results tfoot td {
+  font-weight: 700; background: var(--surface); border-top: 2px solid var(--line); border-bottom: 0;
+}
+td.better, .chip.better { color: var(--aqua); }
+td.worse, .chip.worse { color: var(--red); }
+td.same, .chip.same { color: var(--muted); }
+td.verdict-cell { font-weight: 650; }
+
+.pill {
+  margin-left: 8px; font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .05em; color: var(--amber); border: 1px solid var(--amber);
+  border-radius: 999px; padding: 1px 7px;
+}
+.note { color: var(--muted); font-size: 12.5px; line-height: 1.6; margin: 10px 2px 0; max-width: 1000px; }
+
+/* ------------------------------------------------- per-file breakdown */
+.detail {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+  margin-top: 14px; padding: 4px 18px;
+}
+.detail > summary {
+  cursor: pointer; padding: 12px 2px; font-size: 15px;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+}
+.detail .dim { color: var(--muted); font-size: 13px; font-weight: 400; }
+.chip {
+  margin-left: auto; font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.detail-body { padding: 6px 0 18px; }
+.detail-body .scoreboard { margin-bottom: 20px; }
+.detail-body .texts { margin-top: 20px; }
+
 @media (max-width: 1100px) {
   .scoreboard { grid-template-columns: 1fr; }
   .arrow { min-height: 46px; }
   .texts { grid-template-columns: 1fr; }
-  .upload { margin-left: 0; }
 }

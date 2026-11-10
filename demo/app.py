@@ -38,6 +38,7 @@ from doculens.data.corpus import (  # noqa: E402
     CLEAN_CONDITION,
     CLEAN_LEVEL,
     derive_variant_rng,
+    parse_corpus_filename,
     read_image,
 )
 from doculens.data.degradations import apply_degradation  # noqa: E402
@@ -55,6 +56,8 @@ MAX_UPLOAD_BYTES = 16 * 1024 * 1024
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_BYTES
+# Never serve a stale stylesheet or script from the browser cache during a demo.
+app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
 
 class DemoState:
@@ -126,15 +129,21 @@ def encode_png(image: np.ndarray, width: int = PREVIEW_WIDTH) -> str:
 
 
 def _read_result(
-    image: np.ndarray, ground_truth: str | None, config: Config, engine: TesseractEngine
+    image: np.ndarray,
+    ground_truth: str | None,
+    config: Config,
+    engine: TesseractEngine,
+    with_confidence: bool = False,
 ) -> dict[str, Any]:
     """OCR an image and score it against the ground truth if there is one.
 
     Args:
         image: Image to recognise.
-        ground_truth: Reference text, or ``None`` for an uploaded page.
+        ground_truth: Reference text, or ``None`` for an unmatched upload.
         config: Validated configuration.
         engine: OCR engine.
+        with_confidence: Also run the reference-free confidence pass. Costs a
+            second recognition, so it is requested only when it will be shown.
 
     Returns:
         A mapping with the transcript, timings and metrics.
@@ -148,11 +157,17 @@ def _read_result(
         "ocr_ms": round(elapsed_ms, 1),
         "cer": None,
         "wer": None,
+        "confidence": None,
+        "n_words": None,
     }
     if ground_truth is not None:
         cer, wer = score(ground_truth, text, config.eval.normalisation)
         result["cer"] = round(cer, 4)
         result["wer"] = round(wer, 4)
+    if with_confidence:
+        confidence, n_words = engine.confidence(image)
+        result["confidence"] = None if confidence is None else round(confidence, 1)
+        result["n_words"] = n_words
     return result
 
 
@@ -224,11 +239,41 @@ def _load_source(payload: dict[str, Any]) -> tuple[np.ndarray, str | None, str]:
     return degraded, ground_truth, f"{degradation} level {level} ({detail})"
 
 
-def _load_upload() -> tuple[np.ndarray, None, str]:
+def _match_ground_truth(filename: str) -> tuple[str | None, str | None]:
+    """Look up the ground truth for an uploaded file by its name.
+
+    An image whose name follows the corpus convention -- ``doc_002.png`` or
+    ``doc_002__lowlight__3.png`` -- is a page this project generated, so its
+    reference text is on disk and CER can be computed exactly. Anything else
+    is an outside page and can only be described, not scored.
+
+    Args:
+        filename: The uploaded file's name.
+
+    Returns:
+        ``(ground_truth, doc_id)``, both ``None`` when the name matches no
+        corpus document.
+    """
+    parsed = parse_corpus_filename(filename)
+    if parsed is None:
+        return None, None
+    doc_id = parsed[0]
+    current = _state()
+    rows = current.manifest[current.manifest["doc_id"] == doc_id]
+    if rows.empty:
+        return None, None
+    txt = current.config.paths.root / rows.iloc[0]["txt"]
+    if not txt.is_file():
+        return None, None
+    return txt.read_text(encoding="utf-8"), doc_id
+
+
+def _load_upload() -> tuple[np.ndarray, str | None, str]:
     """Read an uploaded page from the request.
 
     Returns:
-        A tuple ``(image, None, label)``; uploads have no ground truth.
+        A tuple ``(image, ground_truth, label)``. The ground truth is ``None``
+        unless the file name identifies a corpus document.
 
     Raises:
         ValueError: If no readable image was uploaded.
@@ -240,7 +285,9 @@ def _load_upload() -> tuple[np.ndarray, None, str]:
     image = cv2.imdecode(data, cv2.IMREAD_GRAYSCALE)
     if image is None:
         raise ValueError(f"could not decode {uploaded.filename!r} as an image")
-    return image, None, f"uploaded: {uploaded.filename}"
+    ground_truth, doc_id = _match_ground_truth(uploaded.filename)
+    suffix = f" (matched corpus document {doc_id})" if doc_id else ""
+    return image, ground_truth, f"{uploaded.filename}{suffix}"
 
 
 @app.post("/api/run")
@@ -248,8 +295,9 @@ def run() -> Any:
     """Run the baseline and one pipeline over a page and return everything."""
     current = _state()
     config = current.config
+    uploaded = bool(request.files)
     try:
-        if request.files:
+        if uploaded:
             image, ground_truth, label = _load_upload()
             pipeline_name = request.form.get("pipeline") or config.eval.report.headline_method
         else:
@@ -264,8 +312,10 @@ def run() -> Any:
     processed, captured = pipeline.run_capturing(image)
     preprocess_ms = (time.perf_counter() - started) * 1000.0
 
-    baseline = _read_result(image, ground_truth, config, current.engine)
-    pipeline_result = _read_result(processed, ground_truth, config, current.engine)
+    # Confidence is the only comparison an unscoreable upload has, so it is
+    # computed for uploads and skipped for the corpus, where CER is exact.
+    baseline = _read_result(image, ground_truth, config, current.engine, uploaded)
+    pipeline_result = _read_result(processed, ground_truth, config, current.engine, uploaded)
     pipeline_result["preprocess_ms"] = round(preprocess_ms, 1)
 
     stages = [{"name": "input", "png": encode_png(image)}]
@@ -283,7 +333,12 @@ def run() -> Any:
             "label": label,
             "pipeline": pipeline_name,
             "baseline_method": BASELINE_METHOD,
+            "uploaded": uploaded,
+            "scored": ground_truth is not None,
+            "width": int(image.shape[1]),
+            "height": int(image.shape[0]),
             "stages": stages,
+            "stage_names": [stage["name"] for stage in stages],
             "baseline": baseline,
             "result": pipeline_result,
             "ground_truth": (

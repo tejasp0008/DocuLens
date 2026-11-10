@@ -49,6 +49,34 @@ def degraded_filename(doc_id: str, degradation: str, level: int) -> str:
     return f"{doc_id}{_FILENAME_SEPARATOR}{degradation}{_FILENAME_SEPARATOR}{level}.png"
 
 
+def parse_corpus_filename(name: str) -> tuple[str, str, int] | None:
+    """Recover the corpus identity of a file from its name.
+
+    The inverse of :func:`degraded_filename`, extended to also accept a clean
+    page name such as ``doc_001.png``. It exists so that an image handed back
+    to the project -- uploaded through the demo, say, or found loose on disk --
+    can be matched to its ground truth instead of being treated as unscoreable.
+    Any other name is not a corpus file and returns ``None``.
+
+    Args:
+        name: A file name or path, with or without directories and suffix.
+
+    Returns:
+        ``(doc_id, degradation, level)``, with ``("none", 0)`` for a clean page,
+        or ``None`` if the name does not follow either corpus convention.
+    """
+    stem = Path(name).stem
+    parts = stem.split(_FILENAME_SEPARATOR)
+    if len(parts) == 1:
+        return (parts[0], CLEAN_CONDITION, CLEAN_LEVEL) if parts[0] else None
+    if len(parts) != 3:
+        return None
+    doc_id, degradation, level = parts
+    if not doc_id or not degradation or not level.isdigit():
+        return None
+    return doc_id, degradation, int(level)
+
+
 def derive_variant_rng(
     global_seed: int, doc_id: str, degradation: str, level: int
 ) -> np.random.Generator:

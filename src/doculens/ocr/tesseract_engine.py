@@ -6,6 +6,7 @@ import logging
 import shutil
 import subprocess
 from dataclasses import dataclass
+from statistics import fmean
 
 import cv2
 import numpy as np
@@ -123,3 +124,55 @@ class TesseractEngine:
             logger.warning("tesseract failed on an image: %s", exc)
             return ""
         return text
+
+    def confidence(self, image: Image) -> tuple[float | None, int]:
+        """Return Tesseract's own mean word confidence for ``image``.
+
+        This is a *reference-free* quality signal: unlike CER it needs no
+        ground truth, so it is the only quantitative comparison available for
+        a page the project did not generate. It reports how sure the recogniser
+        is, not how right it is, and the two can disagree -- a confidently
+        misread word scores high. It is therefore used to describe arbitrary
+        uploads, never to choose a pipeline or to stand in for CER anywhere in
+        the evaluation.
+
+        Costs a second Tesseract pass over the image, so callers that also
+        need the transcript pay for two recognitions.
+
+        Args:
+            image: Grayscale or BGR ``uint8`` image. Not mutated.
+
+        Returns:
+            ``(mean_confidence, word_count)`` where the confidence is a
+            percentage in ``[0, 100]``, or ``(None, 0)`` when no word was
+            recognised or Tesseract failed.
+
+        Raises:
+            OCRError: If ``image`` is not a numpy array.
+        """
+        if not isinstance(image, np.ndarray):
+            raise OCRError(
+                f"TesseractEngine.confidence expected a numpy array, got {type(image)!r}"
+            )
+        prepared = cv2.cvtColor(image, cv2.COLOR_BGR2RGB) if image.ndim == 3 else image
+        try:
+            data = pytesseract.image_to_data(
+                prepared,
+                lang=self.lang,
+                config=self.config,
+                timeout=self.timeout_s,
+                output_type=pytesseract.Output.DICT,
+            )
+        except (RuntimeError, pytesseract.TesseractError) as exc:
+            logger.warning("tesseract confidence pass failed: %s", exc)
+            return None, 0
+        # Tesseract emits a row per layout box; only rows carrying a word have
+        # a usable confidence, the rest are reported as -1.
+        scores = [
+            float(conf)
+            for conf, word in zip(data.get("conf", ()), data.get("text", ()), strict=False)
+            if str(word).strip() and float(conf) >= 0.0
+        ]
+        if not scores:
+            return None, 0
+        return fmean(scores), len(scores)
