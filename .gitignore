@@ -1,0 +1,25 @@
+# Generated dataset and experiment outputs: reproduce with `make all`.
+data/*
+!data/.gitkeep
+outputs/*
+!outputs/.gitkeep
+results/*
+!results/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/

@@ -1,0 +1,206 @@
+# DocuLens default configuration.
+# Every tunable number used anywhere in the codebase lives in this file.
+
+# Global RNG seed: seeds Faker, numpy and the stdlib `random` module.
+seed: 42
+
+paths:
+  data_dir: data
+  clean_dir: data/clean          # generated pristine documents + ground truth
+  degraded_dir: data/degraded    # degraded variants of the clean documents
+  outputs_dir: outputs
+  stages_dir: outputs/stages     # per-stage intermediate images (save_stages)
+  results_dir: results           # tables, charts, failure figures
+
+data:
+  n_docs: 60
+  locale: en_IN
+  doc_types: [claim_form, invoice]
+  canvas:
+    width: 1240
+    height: 1754
+    background: 255
+  margin: 90
+  line_spacing: 42
+  text_colour: 25
+  font:
+    # Tried in order; first readable TrueType file wins. If none exist the
+    # matplotlib-bundled DejaVuSans is auto-located, then PIL's bitmap default.
+    candidates:
+      - /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf
+      - /usr/share/fonts/dejavu/DejaVuSans.ttf
+      - /Library/Fonts/DejaVuSans.ttf
+      - /System/Library/Fonts/Supplemental/Arial.ttf
+      - /Library/Fonts/Arial.ttf
+      - C:/Windows/Fonts/arial.ttf
+    bold_candidates:
+      - /usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf
+      - /usr/share/fonts/dejavu/DejaVuSans-Bold.ttf
+      - /Library/Fonts/DejaVuSans-Bold.ttf
+      - /System/Library/Fonts/Supplemental/Arial Bold.ttf
+      - C:/Windows/Fonts/arialbd.ttf
+    size_title: 38
+    size_body: 27
+  split:                         # fractions, must sum to 1.0
+    train: 0.5
+    val: 0.2
+    test: 0.3
+
+# Degradation registry. Each name maps to a function in data/degradations.py
+# and carries exactly three severity levels (1 = mild, 3 = severe).
+degradations:
+  blur:
+    levels:
+      1: {ksize: 3}
+      2: {ksize: 5}
+      3: {ksize: 7}
+  noise:
+    levels:
+      1: {sigma: 10}
+      2: {sigma: 25}
+      3: {sigma: 40}
+  skew:
+    levels:
+      1: {angle_deg: 2.0}
+      2: {angle_deg: 5.0}
+      3: {angle_deg: 8.0}
+  lowlight:
+    levels:
+      1: {min_gain: 0.75, max_gain: 1.0}
+      2: {min_gain: 0.55, max_gain: 1.0}
+      3: {min_gain: 0.40, max_gain: 1.0}
+  jpeg:
+    levels:
+      1: {quality: 60}
+      2: {quality: 30}
+      3: {quality: 10}
+
+# Named pipelines: ordered lists of registered stages plus their parameters.
+# Adding a pipeline here is enough to include it in `run` (see eval.methods).
+#
+# Stage parameters were selected on the TRAIN split with scripts/tune_pipeline.py.
+# Two findings from that sweep are baked in here and reported in results/REPORT.md:
+#   * median_blur ksize 5 destroys thin glyph strokes at this resolution; 3 is right.
+#   * CLAHE amplifies sensor noise badly enough to break binarisation, and adaptive
+#     thresholding already handles the shadow gradient CLAHE was meant to fix. It is
+#     therefore NOT in pipeline_full; `pipeline_clahe` below keeps it so the cost
+#     stays visible in the results rather than being quietly dropped.
+pipelines:
+  pipeline_basic:
+    - stage: grayscale
+    - stage: median_blur
+      params: {ksize: 3}
+    - stage: otsu_threshold
+
+  pipeline_full:
+    - stage: grayscale
+    - stage: nlmeans_denoise
+      params: {strength: 16.0, template_window: 7, search_window: 21}
+    - stage: median_blur
+      params: {ksize: 3}
+    - stage: bilateral_filter
+      params: {diameter: 7, sigma_colour: 50.0, sigma_space: 50.0}
+    - stage: deskew
+      params: {max_abs_angle_deg: 15.0, border_value: 255}
+    - stage: adaptive_threshold
+      params: {block_size: 31, c: 15}
+    - stage: morphology_open
+      params: {kernel_width: 2, kernel_height: 2, iterations: 1}
+
+  # Same as pipeline_full but global Otsu instead of adaptive Gaussian,
+  # isolating the effect of the thresholding choice.
+  pipeline_full_otsu:
+    - stage: grayscale
+    - stage: nlmeans_denoise
+      params: {strength: 16.0, template_window: 7, search_window: 21}
+    - stage: median_blur
+      params: {ksize: 3}
+    - stage: bilateral_filter
+      params: {diameter: 7, sigma_colour: 50.0, sigma_space: 50.0}
+    - stage: deskew
+      params: {max_abs_angle_deg: 15.0, border_value: 255}
+    - stage: otsu_threshold
+    - stage: morphology_open
+      params: {kernel_width: 2, kernel_height: 2, iterations: 1}
+
+  # pipeline_full plus CLAHE, kept so the contrast-enhancement cost is measured
+  # rather than asserted.
+  pipeline_clahe:
+    - stage: grayscale
+    - stage: nlmeans_denoise
+      params: {strength: 16.0, template_window: 7, search_window: 21}
+    - stage: median_blur
+      params: {ksize: 3}
+    - stage: bilateral_filter
+      params: {diameter: 7, sigma_colour: 50.0, sigma_space: 50.0}
+    - stage: clahe
+      params: {clip_limit: 2.0, tile_grid_size: [8, 8]}
+    - stage: deskew
+      params: {max_abs_angle_deg: 15.0, border_value: 255}
+    - stage: adaptive_threshold
+      params: {block_size: 31, c: 15}
+    - stage: morphology_open
+      params: {kernel_width: 2, kernel_height: 2, iterations: 1}
+
+  # The variant the leave-one-stage-out ablation points at: removing median_blur,
+  # bilateral_filter or morphology_open each *lowered* mean CER on the test split.
+  # Kept OUT of eval.methods on purpose. Two reasons, both in the README:
+  #   1. Selecting it on test-split evidence would be leakage.
+  #   2. It was checked on the TRAIN split and is five times worse than
+  #      pipeline_full (0.0460 vs 0.0085), collapsing to CER 0.705 on severity-3
+  #      noise. Leave-one-out measures marginal contribution, not joint necessity:
+  #      the three denoisers are redundant with each other individually and
+  #      load-bearing together.
+  # Reproduce with:
+  #   python scripts/tune_pipeline.py --pipelines pipeline_full pipeline_lean
+  pipeline_lean:
+    - stage: grayscale
+    - stage: nlmeans_denoise
+      params: {strength: 16.0, template_window: 7, search_window: 21}
+    - stage: deskew
+      params: {max_abs_angle_deg: 15.0, border_value: 255}
+    - stage: adaptive_threshold
+      params: {block_size: 31, c: 15}
+
+ocr:
+  engine: tesseract
+  tesseract:
+    lang: eng
+    config: "--oem 3 --psm 6"
+    timeout_s: 60
+
+segmentation:
+  # Connected-component field-region extraction (diagnostic only; not part of
+  # the OCR path). Thresholds are fractions of image width/height.
+  enabled: true
+  dilate_kernel_width: 25
+  dilate_kernel_height: 3
+  min_region_width_frac: 0.02
+  min_region_height_frac: 0.004
+  max_region_height_frac: 0.08
+
+eval:
+  # Text normalisation applied to BOTH prediction and ground truth before
+  # CER/WER. Documented in README.
+  normalisation:
+    lowercase: true
+    collapse_whitespace: true
+    strip: true
+    remove_punctuation: false
+  # Methods compared in `run`. "baseline_raw" is reserved (no preprocessing);
+  # every other name must be a key under `pipelines`.
+  methods: [baseline_raw, pipeline_basic, pipeline_full, pipeline_full_otsu, pipeline_clahe]
+  # Only these splits are used for reported numbers.
+  report_splits: [test]
+  ablation:
+    pipeline: pipeline_full
+  failures:
+    top_k: 6
+    method: pipeline_full
+  report:
+    dpi: 200
+    stage_sample_docs: 2
+    # Condition used for the stage-by-stage montage figures.
+    stage_sample_degradation: lowlight
+    stage_sample_level: 3
+    headline_method: pipeline_full
