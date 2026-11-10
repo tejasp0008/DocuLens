@@ -278,8 +278,13 @@ def severity_line_chart(
     colours = method_colours(methods)
     columns = min(len(degradations), 3) or 1
     rows = (len(degradations) + columns - 1) // columns
+    # Independent y scales per panel. A shared scale is dominated by whichever
+    # degradation is worst (here lowlight, ~0.6 CER) and flattens every other
+    # panel into an unreadable line along the axis. Cross-degradation comparison
+    # is the grouped bar chart's job; this chart's job is the shape of each
+    # curve, so each panel is scaled to its own data and says so.
     figure, axes = plt.subplots(
-        rows, columns, figsize=(4.0 * columns, 3.2 * rows), squeeze=False, sharey=True
+        rows, columns, figsize=(4.0 * columns, 3.2 * rows), squeeze=False, sharey=False
     )
     flat = [ax for row in axes for ax in row]
 
@@ -303,14 +308,14 @@ def severity_line_chart(
             )
         ax.set_title(degradation)
         ax.set_xlabel("severity level")
+        ax.set_ylabel(y_label)
         ax.set_xticks(sorted(subset["level"].unique()))
+        ax.set_ylim(bottom=0)
         ax.grid(axis="x", visible=False)
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
     for ax in flat[len(degradations) :]:
         ax.set_visible(False)
-    for row in axes:
-        row[0].set_ylabel(y_label)
 
     handles = [
         plt.Line2D(
@@ -326,8 +331,16 @@ def severity_line_chart(
         for m in methods
     ]
     figure.legend(handles, list(methods), loc="lower center", ncol=min(len(methods), 4))
-    figure.suptitle(title, fontsize=13, fontweight="bold", color=INK_PRIMARY)
-    figure.tight_layout(rect=(0, 0.08, 1, 0.96))
+    figure.suptitle(title, fontsize=13, fontweight="bold", color=INK_PRIMARY, y=0.985)
+    figure.text(
+        0.5,
+        0.932,
+        "each panel is scaled to its own data - compare shapes, not heights",
+        ha="center",
+        fontsize=9.5,
+        color=INK_SECONDARY,
+    )
+    figure.tight_layout(rect=(0, 0.08, 1, 0.915))
     return figure
 
 
