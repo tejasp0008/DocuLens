@@ -448,8 +448,8 @@ page while a local one recovers it &mdash; and headless Chrome renders
 `paper/paper.html` to PDF. Chrome is the only extra requirement; set `CHROME=` to point
 at another install, or open `paper/paper.html` in any browser and print to PDF.
 
-The author block in `paper/paper.html` carries `&#10216;Institution&#10217;` and
-`&#10216;City, India&#10217;` placeholders &mdash; fill those in before submitting.
+The title and author block live at the top of `paper/paper.html`; edit them there and
+re-run `make paper`.
 
 ---
 

@@ -175,7 +175,8 @@ code { font-family: "Courier New", monospace; font-size: 0.85em; hyphens: none; 
   <div class="authors">
     <div class="name">Tejas Pal</div>
     <div class="affil">Department of Computer Science and Engineering</div>
-    <div class="affil">&#10216;Institution&#10217;, &#10216;City, India&#10217;</div>
+    <div class="affil">Rajiv Gandhi Institute of Petroleum Technology</div>
+    <div class="affil">Amethi, India</div>
     <div class="mail">tejaspal0001@gmail.com</div>
   </div>
 </div>
@@ -283,8 +284,7 @@ that rectangle's angle in a quadrant-dependent range, so the raw value is folded
 and treated as zero rotation. Adaptive thresholding computes a Gaussian-weighted local mean
 over a 31&nbsp;&times;&nbsp;31 neighbourhood and subtracts a constant <em>C</em>&nbsp;=&nbsp;15,
 producing one threshold per pixel instead of one per page. Morphological opening uses a
-2&nbsp;&times;&nbsp;2 kernel on the inverted image, because pages are dark ink on light
-paper and the operation must act on the ink.</p>
+2&nbsp;&times;&nbsp;2 kernel on the inverted image, since the operation must act on the ink.</p>
 
 <div class="table-wrap">
   <div class="tnum">Table I</div>
@@ -344,15 +344,15 @@ states the procedure.</p>
 <h2>IV.&nbsp;&nbsp;Dataset</h2>
 
 <p>Real claim documents carry personal data and cannot be redistributed, and hand-keying
-reference text for a few hundred scans is both expensive and error-prone. We therefore
-synthesise the corpus, which buys character-exact ground truth at zero labelling cost and
-full control over the degradation.</p>
+reference text is expensive and error-prone. We therefore synthesise the corpus, which buys
+character-exact ground truth at zero labelling cost and full control over the
+degradation.</p>
 
 <p>Sixty documents are rendered at 1240&nbsp;&times;&nbsp;1754&nbsp;px (A4 at 150&nbsp;dpi),
 half motor claim forms and half garage tax invoices, with field values drawn from Faker's
 <code>en_IN</code> locale. Identifiers follow Indian conventions: policy and claim numbers,
-GSTIN, vehicle registrations of the form <code>MH 07 DN 3514</code>, phone numbers, and
-amounts in Indian digit grouping (<code>INR 1,15,299.55</code>). Invoice arithmetic is
+GSTIN, vehicle registrations such as <code>MH 07 DN 3514</code>, and amounts in Indian digit
+grouping (<code>INR 1,15,299.55</code>). Invoice arithmetic is
 internally consistent&mdash;subtotal equals labour plus parts, CGST and SGST are each 9% of
 the subtotal&mdash;so a future extraction stage can be validated against the page's own
 semantics. Each document averages 849 characters, 115 words and 25 labelled fields, and is
@@ -390,9 +390,9 @@ figures are at <span class="url">github.com/tejasp0008/DocuLens</span>.</p>
 
 <h2>VI.&nbsp;&nbsp;Novelty and Unique Selling Point</h2>
 
-<p>The novelty of this work is not a new filter. Every operator used is textbook. What is
-novel is the measurement discipline applied to their combination, and the visualisation
-that makes the result mechanistic rather than anecdotal.</p>
+<p>The novelty here is not a new filter: every operator used is textbook. What is novel is
+the measurement discipline applied to their combination, and the visualisation that makes the
+result mechanistic rather than anecdotal.</p>
 
 <p>Fig. 2 is that visualisation, and it is the project's USP. It takes one corpus image
 under severe uneven illumination and shows, in one row, why the headline result happens.
