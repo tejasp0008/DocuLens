@@ -15,9 +15,10 @@ CONFIG      ?= configs/default.yaml
 JOBS        ?=
 JOBS_FLAG   := $(if $(JOBS),--jobs $(JOBS),)
 PORT        ?= 8000
+CHROME      ?= /Applications/Google Chrome.app/Contents/MacOS/Google Chrome
 
 .DEFAULT_GOAL := help
-.PHONY: help setup data generate degrade run ablate report demo test lint format all clean clean-results
+.PHONY: help setup data generate degrade run ablate report paper demo test lint format all clean clean-results
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -55,6 +56,14 @@ ablate: ## Leave-one-stage-out ablation of the headline pipeline
 
 report: ## Write tables, charts and figures from existing results
 	$(DOCULENS) -c $(CONFIG) report
+
+paper: ## Build the four-page IEEE write-up at paper/DocuLens_IEEE.pdf
+	$(PYTHON) scripts/make_paper_figure.py -c $(CONFIG)
+	@test -x "$(CHROME)" || (echo "Chrome not found at $(CHROME)."; \
+	    echo "Set CHROME=/path/to/chrome, or open paper/paper.html and print to PDF."; exit 1)
+	cd paper && "$(CHROME)" --headless --disable-gpu --no-pdf-header-footer \
+	    --print-to-pdf=DocuLens_IEEE.pdf --virtual-time-budget=10000 paper.html
+	@echo "wrote paper/DocuLens_IEEE.pdf"
 
 all: ## Full reproduction: data, evaluation, ablation, failures and report
 	$(DOCULENS) -c $(CONFIG) all $(JOBS_FLAG)

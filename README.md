@@ -420,9 +420,36 @@ results/
   REPORT.md                   the report skeleton filled with real numbers
   figures/                    charts, stage montages, block diagram (200 dpi)
   failures/                   worst-6 side-by-side figures + failures.csv
+paper/
+  paper.html                  the write-up source (IEEE two-column CSS)
+  DocuLens_IEEE.pdf           the four-page PDF
+  figures/                    figures built for the paper by scripts/make_paper_figure.py
 ```
 
-`data/`, `outputs/` and `results/` are gitignored; `make all` regenerates them.
+`data/` and `outputs/` are gitignored; `make all` regenerates them. `results/` and
+`paper/` are tracked so the numbers and the write-up can be read without a full re-run.
+
+---
+
+## The four-page write-up
+
+A four-page IEEE conference-format paper covering the problem statement, state of the
+art, methodology with flowchart and pseudocode, implementation, dataset, novelty,
+results and references:
+
+```bash
+make paper          # -> paper/DocuLens_IEEE.pdf
+```
+
+Every number in it is read from `results/`, never typed in. The build does two things:
+`scripts/make_paper_figure.py` draws the figures the paper needs at print size &mdash;
+including the mechanism figure that shows why a global threshold destroys a shadowed
+page while a local one recovers it &mdash; and headless Chrome renders
+`paper/paper.html` to PDF. Chrome is the only extra requirement; set `CHROME=` to point
+at another install, or open `paper/paper.html` in any browser and print to PDF.
+
+The author block in `paper/paper.html` carries `&#10216;Institution&#10217;` and
+`&#10216;City, India&#10217;` placeholders &mdash; fill those in before submitting.
 
 ---
 
@@ -455,6 +482,8 @@ src/doculens/
   extraction/ rag/ services/    STUBS ONLY - see docs/EXTENDING.md
 configs/default.yaml            every tunable value in the project
 scripts/tune_pipeline.py        train-split parameter sweep
+scripts/make_paper_figure.py    figures for the write-up, drawn at print size
+paper/                          four-page IEEE write-up (source + PDF)
 demo/                           live demo UI (presentation only, not graded)
 tests/                          pytest suite
 ```

@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DocuLens IEEE write-up</title>
+<style>
+/* ------------------------------------------------------------------
+   IEEE conference format, two columns, US Letter.
+   Geometry follows the IEEE conference template: 0.75in top margin,
+   0.625in side margins, two 3.5in columns separated by a 0.2in gutter.
+   ------------------------------------------------------------------ */
+@page {
+  size: 8.5in 11in;
+  margin: 0.75in 0.625in 0.9in 0.625in;
+}
+
+html { font-size: 10pt; }
+
+body {
+  margin: 0;
+  font-family: "Times New Roman", "Liberation Serif", Times, serif;
+  font-size: 10pt;
+  line-height: 1.035;
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  column-count: 2;
+  column-gap: 0.2in;
+  column-fill: auto;
+}
+
+/* --------------------------------------------------------- title block */
+.titleblock {
+  column-span: all;
+  text-align: center;
+  margin-bottom: 9pt;
+}
+h1.title {
+  font-size: 19pt;
+  font-weight: normal;
+  line-height: 1.08;
+  margin: 0 0 8pt;
+}
+.authors { font-size: 11pt; line-height: 1.25; }
+.authors .name { font-size: 11pt; }
+.authors .affil { font-style: italic; }
+.authors .mail { font-family: "Courier New", monospace; font-size: 9pt; }
+
+/* ------------------------------------------------------------ abstract */
+.abstract, .keywords {
+  font-size: 9pt;
+  font-weight: bold;
+  line-height: 1.08;
+  margin: 0 0 6pt;
+  text-align: justify;
+}
+.abstract .lead { font-style: italic; }
+.keywords .lead { font-style: italic; }
+
+/* ------------------------------------------------------------ headings */
+h2 {
+  font-size: 10pt;
+  font-weight: normal;
+  font-variant: small-caps;
+  text-align: center;
+  margin: 9pt 0 2.5pt;
+  break-after: avoid;
+}
+h3 {
+  font-size: 10pt;
+  font-weight: normal;
+  font-style: italic;
+  margin: 6pt 0 1.5pt;
+  break-after: avoid;
+}
+p { margin: 0; text-indent: 0.2in; }
+p.noindent, h2 + p, h3 + p { text-indent: 0; }
+
+/* ------------------------------------------------------------- figures */
+figure {
+  margin: 7pt 0 5pt;
+  break-inside: avoid;
+  text-align: center;
+}
+figure img { width: 100%; display: block; }
+figure.narrow img { width: 92%; margin: 0 auto; }
+figcaption {
+  font-size: 8pt;
+  line-height: 1.1;
+  text-align: justify;
+  margin-top: 4pt;
+}
+figure.wide {
+  column-span: all;
+  margin: 2pt 0 8pt;
+}
+figure.wide figcaption { text-align: justify; }
+
+/* -------------------------------------------------------------- tables */
+.table-wrap { break-inside: avoid; margin: 7pt 0 6pt; }
+.table-wrap.wide { column-span: all; }
+.tnum {
+  font-size: 8pt;
+  font-variant: small-caps;
+  text-align: center;
+  margin-bottom: 2pt;
+}
+.tcap {
+  font-size: 8pt;
+  text-align: center;
+  margin-bottom: 3pt;
+  line-height: 1.15;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 8pt;
+  line-height: 1.15;
+}
+table th, table td { padding: 1pt 3pt; }
+table thead th {
+  border-top: 0.9pt solid #000;
+  border-bottom: 0.5pt solid #000;
+  font-weight: normal;
+  font-style: italic;
+}
+table tbody tr:last-child td { border-bottom: 0.9pt solid #000; }
+td.n, th.n { text-align: right; }
+td.c, th.c { text-align: center; }
+tr.sep td { border-top: 0.5pt solid #000; }
+.tnote { font-size: 7.5pt; line-height: 1.2; margin-top: 2.5pt; text-indent: 0; }
+
+/* ----------------------------------------------------------- algorithm */
+.algo {
+  break-inside: avoid;
+  border-top: 0.9pt solid #000;
+  border-bottom: 0.9pt solid #000;
+  margin: 7pt 0 6pt;
+  padding: 2.5pt 0 3pt;
+  font-size: 8pt;
+  line-height: 1.12;
+}
+.algo .head {
+  font-weight: bold;
+  border-bottom: 0.5pt solid #000;
+  padding-bottom: 2pt;
+  margin-bottom: 3pt;
+}
+.algo ol { margin: 0; padding-left: 15pt; }
+.algo li { margin: 0; }
+.algo .kw { font-weight: bold; }
+.algo .cm { font-style: italic; color: #333; }
+.algo code { font-family: "Times New Roman", Times, serif; font-style: italic; }
+
+/* ---------------------------------------------------------- references */
+h2.refhead { margin-top: 10pt; }
+ol.refs {
+  font-size: 8pt;
+  line-height: 1.1;
+  margin: 0;
+  padding-left: 13pt;
+  text-align: left;
+}
+ol.refs li { margin-bottom: 0.6pt; }
+.url { font-family: "Courier New", monospace; font-size: 7.3pt; }
+code { font-family: "Courier New", monospace; font-size: 0.85em; hyphens: none; -webkit-hyphens: none; }
+.algo code, .tcap code, figcaption code { font-size: 0.95em; }
+</style>
+</head>
+<body>
+
+<div class="titleblock">
+  <h1 class="title">DocuLens: Measuring What Classical Image Processing<br>
+  Actually Contributes to OCR of Degraded<br>Insurance Claim Documents</h1>
+  <div class="authors">
+    <div class="name">Tejas Pal</div>
+    <div class="affil">Department of Computer Science and Engineering</div>
+    <div class="affil">&#10216;Institution&#10217;, &#10216;City, India&#10217;</div>
+    <div class="mail">tejaspal0001@gmail.com</div>
+  </div>
+</div>
+
+<p class="abstract"><span class="lead">Abstract</span>&mdash;Insurance claim intake in India
+receives claim forms and garage invoices as phone photographs: blurred, noisy, skewed,
+unevenly lit and heavily recompressed. Optical character recognition (OCR) degrades on such
+captures and every downstream step inherits the error. We ask a narrow, measurable question:
+how much of that loss can classical digital image processing (DIP) recover before the
+recogniser ever sees the page? We build a controlled corpus of 60 synthetic Indian claim
+documents with exact ground truth, apply five degradations at three severities each (960
+images), and compare a raw-OCR baseline against four pipelines built from swappable DIP
+stages. On the held-out test split (18 documents, 288 images, 1440 OCR calls),
+the full pipeline cuts mean character error rate (CER) from 0.0749 to 0.0089, a reduction of
+88.1%. The gain is not uniform: CER falls 97.6% on uneven illumination and 67.9% on skew, but
+rises on blurred, JPEG-compressed and already-clean pages. A leave-one-stage-out ablation
+attributes +0.0769 CER to adaptive thresholding alone. We report the negative results, show
+why a global threshold fails where a local one succeeds, and release the seeded code that
+reproduces every number.</p>
+
+<p class="keywords"><span class="lead">Index Terms</span>&mdash;document image processing,
+optical character recognition, adaptive thresholding, image binarization, ablation study,
+reproducible research.</p>
+
+<h2>I.&nbsp;&nbsp;Problem Statement</h2>
+
+<p>Motor insurance claim intake in India is a document problem before it is a decision
+problem. A claimant photographs a handwritten or printed claim form and a garage tax
+invoice on a phone, often indoors, at an angle, under a single overhead light, and uploads
+images that a messaging pipeline has already recompressed. The insurer must read policy
+numbers, claim numbers, GSTIN, vehicle registration and line-item amounts from those
+pictures. Every character the recogniser gets wrong propagates: a misread policy number
+fails validation, a misread amount settles the wrong figure.</p>
+
+<p>The capture defects are not exotic. They are the classical ones&mdash;defocus blur,
+sensor noise, page skew, non-uniform illumination and compression artefacts&mdash;and they
+are exactly what classical DIP was built to address. The engineering question is therefore
+not whether preprocessing is possible but whether it is <em>worth it</em>, and for which
+defects. That question is rarely answered quantitatively. Practitioners assemble a
+plausible chain of filters, observe that output looks cleaner, and ship it.</p>
+
+<p>This work treats the chain as the object of study rather than the tool. We fix an OCR
+engine, construct a corpus in which the ground truth is known exactly and the degradation
+is known by type and severity, and measure what each stage contributes. Our contributions
+are: (i) a reproducible, seeded corpus of Indian claim documents with factorised
+degradations; (ii) a configuration-driven pipeline of swappable DIP stages with a measured
+baseline; (iii) a leave-one-stage-out ablation that isolates each stage's marginal
+contribution; and (iv) an honest account of where the pipeline <em>hurts</em>, with the
+mechanism explained rather than tuned away.</p>
+
+<h2>II.&nbsp;&nbsp;State of the Art</h2>
+
+<p>Binarisation dominates the document-imaging literature. Otsu's global threshold [1]
+maximises between-class variance over the whole-image histogram and remains the default in
+most OCR toolchains. Local methods compute a threshold per pixel neighbourhood: Niblack [2]
+from the local mean and standard deviation, and Sauvola and Pietik&auml;inen [3] with a
+dynamic-range correction that suppresses background texture. The DIBCO competition series
+[4] has benchmarked such methods on degraded historical documents for over a decade and is
+now dominated by learned binarisers.</p>
+
+<p>For the defects that precede binarisation, bilateral filtering [5] smooths while
+preserving edges by weighting neighbours in both space and intensity, and non-local means
+[6] exploits self-similarity across the whole image, which suits documents because glyph
+patches recur. Contrast-limited adaptive histogram equalisation (CLAHE) [7] redistributes
+local intensity while bounding noise amplification. Skew is classically estimated from the
+bounding boxes of connected components [8] or from projection profiles. Tesseract [9] is
+the standard open recogniser; since v4 its line recogniser is an LSTM, which changes what
+preprocessing helps, because the network has itself seen degraded training data. Ye and
+Doermann [10] survey document image quality assessment, i.e. predicting OCR accuracy from
+the image alone.</p>
+
+<p>The gap we address is methodological. Papers that report preprocessing gains for OCR
+typically bundle several operations and report one aggregate improvement on uncontrolled
+captures [11], so the contribution of any single stage is unidentifiable. Reported outcomes
+also reverse with capture quality&mdash;global thresholding can beat local methods on sharp,
+evenly lit scans&mdash;and negative results are seldom published at all. A controlled corpus
+with exact ground truth and factorised degradations makes per-stage, per-defect and
+per-severity attribution possible, and that is what we build.</p>
+
+<h2>III.&nbsp;&nbsp;Methodology</h2>
+
+<h3>A. Pipeline Architecture</h3>
+
+<p>A <em>stage</em> is a pure function from image to image with declared parameters. A
+<em>pipeline</em> is an ordered list of stages named in a YAML configuration and resolved
+through a registry at load time, so a pipeline is data, not code, and an unknown stage name
+fails at start-up rather than mid-run. No numeric constant appears in the image-processing
+code; every parameter lives in the configuration file. Fig. 1 shows the end-to-end flow,
+and Table I lists the stages of the headline pipeline, <code>pipeline_full</code>.</p>
+
+<figure>
+  <img src="figures/flow.png" alt="Pipeline block diagram">
+  <figcaption>Fig. 1. End-to-end flow. Document synthesis emits an image and its exact
+  reference text; degradation produces 16 capture conditions per document; the DIP pipeline
+  is applied; the same OCR engine reads both the raw and the processed image; CER and WER
+  are computed against the reference.</figcaption>
+</figure>
+
+<h3>B. Stage Details</h3>
+
+<p>Deskew estimates the page angle by inverting an Otsu binarisation, taking the
+coordinates of all foreground pixels and fitting a minimum-area rectangle. OpenCV reports
+that rectangle's angle in a quadrant-dependent range, so the raw value is folded into
+[&minus;45&deg;, 45&deg;]; an estimate beyond a configured bound is rejected as unreliable
+and treated as zero rotation. Adaptive thresholding computes a Gaussian-weighted local mean
+over a 31&nbsp;&times;&nbsp;31 neighbourhood and subtracts a constant <em>C</em>&nbsp;=&nbsp;15,
+producing one threshold per pixel instead of one per page. Morphological opening uses a
+2&nbsp;&times;&nbsp;2 kernel on the inverted image, because pages are dark ink on light
+paper and the operation must act on the ink.</p>
+
+<div class="table-wrap">
+  <div class="tnum">Table I</div>
+  <div class="tcap">Stages of <code>pipeline_full</code>, in order, with the parameters
+  fixed in the configuration file.</div>
+  <table>
+    <thead><tr><th class="c">#</th><th>Stage</th><th>Parameters</th></tr></thead>
+    <tbody>
+      <tr><td class="c">0</td><td>grayscale</td><td>&mdash;</td></tr>
+      <tr><td class="c">1</td><td>nlmeans_denoise</td><td>h = 16.0, template 7, search 21</td></tr>
+      <tr><td class="c">2</td><td>median_blur</td><td>ksize = 3</td></tr>
+      <tr><td class="c">3</td><td>bilateral_filter</td><td>d = 7, &sigma;<sub>c</sub> = &sigma;<sub>s</sub> = 50</td></tr>
+      <tr><td class="c">4</td><td>deskew</td><td>max |&theta;| = 15&deg;, border 255</td></tr>
+      <tr><td class="c">5</td><td>adaptive_threshold</td><td>block = 31, C = 15</td></tr>
+      <tr><td class="c">6</td><td>morphology_open</td><td>2 &times; 2 kernel, 1 iteration</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h3>C. Evaluation Protocol</h3>
+
+<p>Both the reference text and the OCR output are normalised identically (lower-cased,
+whitespace collapsed, punctuation retained) and scored with Levenshtein edit distance [12],
+giving CER over characters and WER over whitespace-delimited tokens. CER is deliberately
+not capped at 1.0, so a catastrophic binarisation that invents characters is visible as a
+value above one rather than clipped to it. The reserved method
+<code>baseline_raw</code> applies no preprocessing and defines the comparison. Algorithm 1
+states the procedure.</p>
+
+<div class="algo">
+  <div class="head">Algorithm 1&nbsp;&nbsp;Evaluate a pipeline against the raw baseline</div>
+  <ol>
+    <li><span class="kw">Input:</span> corpus <code>C</code>, methods <code>M</code>,
+      engine <code>E</code>, seed <code>s</code></li>
+    <li><span class="kw">Output:</span> row per (document, degradation, level, method)</li>
+    <li><span class="kw">for each</span> document <code>d</code>, degradation
+      <code>g</code>, level <code>l</code> <span class="kw">in</span> <code>C</code>
+      <span class="kw">do</span></li>
+    <li>&nbsp;&nbsp;<code>r</code> &larr; RNG(CRC32(<code>s, d, g, l</code>))
+      <span class="cm">&#9655; stable across processes</span></li>
+    <li>&nbsp;&nbsp;<code>x</code> &larr; Degrade(Render(<code>d</code>),
+      <code>g</code>, <code>l</code>, <code>r</code>)</li>
+    <li>&nbsp;&nbsp;<code>y</code> &larr; GroundTruth(<code>d</code>)</li>
+    <li>&nbsp;&nbsp;<span class="kw">for each</span> method <code>m</code>
+      <span class="kw">in</span> <code>M</code> <span class="kw">do</span></li>
+    <li>&nbsp;&nbsp;&nbsp;&nbsp;<code>z</code> &larr; <code>x</code>
+      <span class="kw">if</span> <code>m</code> = baseline
+      <span class="kw">else</span> Pipeline(<code>m</code>)(<code>x</code>)</li>
+    <li>&nbsp;&nbsp;&nbsp;&nbsp;<code>t</code> &larr; <code>E</code>.read(<code>z</code>)</li>
+    <li>&nbsp;&nbsp;&nbsp;&nbsp;emit CER(<code>y, t</code>), WER(<code>y, t</code>), timings</li>
+    <li>&nbsp;&nbsp;<span class="kw">end for</span></li>
+    <li><span class="kw">end for</span></li>
+    <li><span class="cm">&#9655; ablation: repeat line 8 with stage i removed, for all i</span></li>
+  </ol>
+</div>
+
+<h2>IV.&nbsp;&nbsp;Dataset</h2>
+
+<p>Real claim documents carry personal data and cannot be redistributed, and hand-keying
+reference text for a few hundred scans is both expensive and error-prone. We therefore
+synthesise the corpus, which buys character-exact ground truth at zero labelling cost and
+full control over the degradation.</p>
+
+<p>Sixty documents are rendered at 1240&nbsp;&times;&nbsp;1754&nbsp;px (A4 at 150&nbsp;dpi),
+half motor claim forms and half garage tax invoices, with field values drawn from Faker's
+<code>en_IN</code> locale. Identifiers follow Indian conventions: policy and claim numbers,
+GSTIN, vehicle registrations of the form <code>MH 07 DN 3514</code>, phone numbers, and
+amounts in Indian digit grouping (<code>INR 1,15,299.55</code>). Invoice arithmetic is
+internally consistent&mdash;subtotal equals labour plus parts, CGST and SGST are each 9% of
+the subtotal&mdash;so a future extraction stage can be validated against the page's own
+semantics. Each document averages 849 characters, 115 words and 25 labelled fields, and is
+written out with its reference text and a JSON field map.</p>
+
+<p>Five degradations are applied at three severity levels: Gaussian blur
+(k&nbsp;=&nbsp;3/5/7), additive Gaussian noise (&sigma;&nbsp;=&nbsp;10/25/40), rotation
+(2&deg;/5&deg;/8&deg;), a multiplicative illumination gradient (minimum gain
+0.75/0.55/0.40) and JPEG recompression (quality 60/30/10). With the undegraded condition
+this gives 16 conditions per document and 960 images in total. Each variant's random state
+is derived from the CRC32 of (seed, document, degradation, level) rather than Python's
+salted <code>hash()</code>, so every image is bit-identical across runs and machines.</p>
+
+<p>The corpus is split 30/12/18 into train, validation and test <em>before</em> any
+tuning. All parameter selection was performed on the train split and confirmed on
+validation; every number reported in Section VII comes from the test split alone.</p>
+
+<h2>V.&nbsp;&nbsp;Implementation</h2>
+
+<p>The system is Python 3.12 in a <code>src/</code> layout: OpenCV for image operations,
+pytesseract driving Tesseract 5.5.4 (<code>--oem 3 --psm 6</code>), jiwer for edit
+distances, pandas for the tidy results table and matplotlib for figures. Stages,
+degradations and OCR engines are each resolved through a registry behind a
+<code>Protocol</code>, so replacing Tesseract with a learned recogniser touches one class
+and one configuration line and leaves the runner, metrics and report untouched.</p>
+
+<p>A single entry point exposes <code>generate</code>, <code>degrade</code>,
+<code>run</code>, <code>ablate</code>, <code>report</code> and <code>all</code>. Results are
+written long-format&mdash;one row per (document, degradation, level, method)&mdash;so every
+table and figure in this paper is a <code>groupby</code> of the same CSV, and the report is
+generated from it rather than typed. The suite has 124 tests and is lint-clean under ruff. A
+full <code>make all</code> run takes 27&nbsp;min&nbsp;36&nbsp;s with eight workers and
+reproduces identical numbers from a clean checkout. The code, the generated report and all
+figures are at <span class="url">github.com/tejasp0008/DocuLens</span>.</p>
+
+<h2>VI.&nbsp;&nbsp;Novelty and Unique Selling Point</h2>
+
+<p>The novelty of this work is not a new filter. Every operator used is textbook. What is
+novel is the measurement discipline applied to their combination, and the visualisation
+that makes the result mechanistic rather than anecdotal.</p>
+
+<p>Fig. 2 is that visualisation, and it is the project's USP. It takes one corpus image
+under severe uneven illumination and shows, in one row, why the headline result happens.
+Panel (b) plots the paper background intensity across the page against the single threshold
+Otsu selects for the whole image. Because the illumination gradient drives the background
+from 255 down to 102 while Otsu commits to T&nbsp;=&nbsp;169, 543 of the 1240 image columns
+hold paper that is darker than the global threshold. Those columns are binarised as ink:
+panel (c) shows the resulting black slab, which destroys 44% of the page and drives CER to
+0.650&mdash;worse than performing no preprocessing at all. A threshold computed per
+neighbourhood tracks the gradient instead of fighting it, and panel (d) recovers the same
+page at CER 0.010. This single figure explains the 97.6% gain on illumination, the failure
+of the Otsu variant, and the ablation result in Section VII simultaneously.</p>
+
+<figure class="wide">
+  <img src="figures/mechanism.png" alt="Why global thresholding fails on uneven illumination">
+  <figcaption>Fig. 2. Why a global threshold fails where a local one succeeds, on
+  <code>doc_002</code> under level-3 uneven illumination. (a) The degraded input. (b) Paper
+  background intensity per image column (blue) against the single threshold Otsu selects for
+  the page (orange) and the local threshold surface the adaptive stage uses instead (green);
+  in the shaded band the paper is darker than the global threshold. (c) Global Otsu
+  binarisation: the 543 shaded columns are read as ink, destroying 44% of the page. (d) The
+  adaptive threshold on the same input. CER values are those recorded for these exact images
+  in the evaluation table.</figcaption>
+</figure>
+
+<p>Three further elements distinguish the study. First, the factorised corpus makes
+attribution possible: a gain can be assigned to a specific defect rather than averaged into a
+single score. Second, the leave-one-stage-out ablation measures each stage's marginal
+contribution instead of justifying stages by intuition. Third, negative results are reported
+in the same table as positive ones and are not tuned away.</p>
+
+<h2>VII.&nbsp;&nbsp;Results</h2>
+
+<p>All results are the test split: 18 documents &times; 16 conditions &times; 5 methods =
+1440 OCR calls. Table II gives the overall comparison.</p>
+
+<div class="table-wrap">
+  <div class="tnum">Table II</div>
+  <div class="tcap">Mean CER and WER per method over the test split (288 images each).
+  Lower is better.</div>
+  <table>
+    <thead><tr><th>Method</th><th class="n">CER</th><th class="n">median CER</th><th class="n">WER</th></tr></thead>
+    <tbody>
+      <tr><td><strong>pipeline_full</strong></td><td class="n"><strong>0.0089</strong></td><td class="n">0.0073</td><td class="n">0.0898</td></tr>
+      <tr><td>pipeline_clahe</td><td class="n">0.0090</td><td class="n">0.0049</td><td class="n">0.0765</td></tr>
+      <tr><td>baseline_raw</td><td class="n">0.0749</td><td class="n">0.0006</td><td class="n">0.1082</td></tr>
+      <tr><td>pipeline_basic</td><td class="n">0.0796</td><td class="n">0.0049</td><td class="n">0.1439</td></tr>
+      <tr><td>pipeline_full_otsu</td><td class="n">0.0984</td><td class="n">0.0217</td><td class="n">0.2567</td></tr>
+    </tbody>
+  </table>
+  <p class="tnote">The baseline's median CER (0.0006) is far below its mean (0.0749): most
+  conditions are easy and a minority are catastrophic.</p>
+</div>
+
+<p>The full pipeline reduces mean CER from 0.0749 to 0.0089, a drop of 88.1%. Two
+comparisons sharpen that number. Replacing only the adaptive threshold with a global Otsu
+threshold (<code>pipeline_full_otsu</code>) yields 0.0984&mdash;worse than no preprocessing
+at all&mdash;so the gain is attributable to local thresholding rather than to preprocessing
+in general. Adding CLAHE (<code>pipeline_clahe</code>) changes CER by 0.0001, within noise:
+once the threshold is local, the contrast enhancement it was meant to provide is redundant.</p>
+
+<h3>A. Where the Pipeline Helps, and Where It Hurts</h3>
+
+<p>Table III decomposes the result by degradation. The pipeline is not a general-purpose
+improvement; it is a strong correction for three defects and a mild liability for three
+others.</p>
+
+<div class="table-wrap">
+  <div class="tnum">Table III</div>
+  <div class="tcap">Mean CER by degradation: raw baseline versus
+  <code>pipeline_full</code>.</div>
+  <table>
+    <thead><tr><th>Degradation</th><th class="n">Baseline</th><th class="n">Pipeline</th><th class="n">Change</th></tr></thead>
+    <tbody>
+      <tr><td>lowlight</td><td class="n">0.3688</td><td class="n">0.0087</td><td class="n">&minus;97.6%</td></tr>
+      <tr><td>skew</td><td class="n">0.0183</td><td class="n">0.0059</td><td class="n">&minus;67.9%</td></tr>
+      <tr><td>noise</td><td class="n">0.0119</td><td class="n">0.0080</td><td class="n">&minus;33.1%</td></tr>
+      <tr class="sep"><td>none (clean)</td><td class="n">0.0003</td><td class="n">0.0084</td><td class="n">+2968%</td></tr>
+      <tr><td>jpeg</td><td class="n">0.0003</td><td class="n">0.0052</td><td class="n">+1818%</td></tr>
+      <tr><td>blur</td><td class="n">0.0002</td><td class="n">0.0169</td><td class="n">+7355%</td></tr>
+    </tbody>
+  </table>
+  <p class="tnote">The large positive percentages are increases over a near-zero base: in
+  absolute terms the pipeline costs at most 0.0167 CER on these conditions, while it saves
+  0.3601 on illumination.</p>
+</div>
+
+<p>The severity breakdown explains the asymmetry. Uneven illumination is a threshold
+effect: at level 1 the baseline is unaffected (CER 0.0005), but at level 2 it collapses to
+0.5255 and at level 3 to 0.5805, because the darkened paper crosses the recogniser's own
+binarisation point. The pipeline is flat at 0.0087 across all three levels&mdash;it does not
+degrade gracefully, it simply does not degrade. Skew shows the same shape more mildly
+(0.0010 &rarr; 0.0103 &rarr; 0.0437 for the baseline, against 0.0061 &rarr; 0.0048 &rarr;
+0.0067 for the pipeline). Blur runs the other way: Tesseract tolerates defocus well
+(baseline 0.0002&ndash;0.0003 at every level), while the pipeline worsens monotonically with
+severity (0.0066 &rarr; 0.0163 &rarr; 0.0277).</p>
+
+<figure>
+  <img src="figures/cer_by_degradation.png" alt="CER by degradation and method">
+  <figcaption>Fig. 3. Mean CER by degradation for all five methods. The illumination group
+  dominates the vertical scale: it is the only condition on which the raw baseline fails
+  outright, and the only one on which preprocessing is decisive.</figcaption>
+</figure>
+
+<h3>B. Ablation</h3>
+
+<p>Table IV removes one stage at a time from <code>pipeline_full</code> and re-runs the
+whole evaluation. A positive delta means removing the stage made recognition worse, so the
+stage earns its place.</p>
+
+<div class="table-wrap">
+  <div class="tnum">Table IV</div>
+  <div class="tcap">Leave-one-stage-out ablation. &Delta;CER is measured against the full
+  pipeline (0.0089).</div>
+  <table>
+    <thead><tr><th>Stage removed</th><th class="n">CER</th><th class="n">&Delta;CER</th></tr></thead>
+    <tbody>
+      <tr><td>adaptive_threshold</td><td class="n">0.0858</td><td class="n">+0.0769</td></tr>
+      <tr><td>nlmeans_denoise</td><td class="n">0.0213</td><td class="n">+0.0124</td></tr>
+      <tr><td>deskew</td><td class="n">0.0136</td><td class="n">+0.0047</td></tr>
+      <tr><td>grayscale</td><td class="n">0.0089</td><td class="n">0.0000</td></tr>
+      <tr class="sep"><td>bilateral_filter</td><td class="n">0.0078</td><td class="n">&minus;0.0011</td></tr>
+      <tr><td>morphology_open</td><td class="n">0.0050</td><td class="n">&minus;0.0039</td></tr>
+      <tr><td>median_blur</td><td class="n">0.0028</td><td class="n">&minus;0.0061</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<p>Adaptive thresholding carries the pipeline: removing it costs more CER than every other
+stage combined, and the residual 0.0858 is close to the untreated baseline. Non-local means
+and deskew pay for themselves. Grayscale conversion is exactly neutral because the corpus is
+rendered in grayscale already; it is retained because a photographed page is not.</p>
+
+<p>The last three rows invite a mistake that we explicitly did not make. These deltas were
+measured on the same split as the headline numbers, so dropping those stages on their
+strength would be selection on the test set and would invalidate every figure above. We
+instead defined the reduced pipeline and evaluated it on <em>train</em>: it scored 0.0460
+against 0.0085 for the full pipeline, and collapsed to 0.7054 on the strongest noise
+condition where the full pipeline scores 0.0068. Leave-one-out measures a stage's
+<em>marginal</em> contribution, not the <em>joint</em> necessity of a group: the three
+smoothing stages are individually redundant and collectively load-bearing.</p>
+
+<h3>C. Failure Analysis and Cost</h3>
+
+<p>The six worst individual cases are all level-3 blur on invoices, with CER between 0.0317
+and 0.0444 against a baseline of approximately zero. The mechanism is consistent: defocus
+thickens strokes, and the adaptive threshold followed by morphological opening merges
+adjacent glyphs in the dense numeric columns of an invoice, turning digit pairs into single
+blobs. Invoices fail where claim forms do not because their numeric fields are narrower and
+more tightly packed. The implication is a routing decision rather than a better filter: a
+page that is already sharp and evenly lit should bypass the pipeline.</p>
+
+<p>Preprocessing costs 2.70&nbsp;s per page of mean wall-clock time in the parallel
+evaluation against 1.38&nbsp;s for baseline OCR alone; measured single-threaded in the
+interactive tool, the same pipeline takes 0.16&ndash;0.22&nbsp;s per page, so the evaluation
+figure reflects eight-way contention and overstates deployed latency.</p>
+
+<h2>VIII.&nbsp;&nbsp;Limitations and Future Work</h2>
+
+<p>Pages are rendered, not scanned: real captures add paper texture, ink variation,
+handwriting, stamps, folds and perspective distortion, so the absolute CER here is
+optimistic and the ranking, not the magnitude, is the transferable result. All numbers come
+from one engine; a recogniser trained on degraded inputs would reorder the methods.
+Degradations are applied one at a time, whereas a real photograph is blurred <em>and</em>
+noisy <em>and</em> skewed at once.</p>
+
+<p>The clearest next step follows from the failure analysis: because the pipeline helps
+badly degraded pages and mildly harms good ones, a cheap quality classifier gating the
+pipeline should dominate applying it unconditionally. Beyond that, the registry interfaces
+are in place for a learned recogniser, a learned binariser benchmarked against DIBCO, and
+field extraction supervised by the JSON ground truth the generator already writes.</p>
+
+<h2>IX.&nbsp;&nbsp;Conclusion</h2>
+
+<p>Classical DIP recovers most of the OCR accuracy lost to degraded claim-document capture:
+88.1% of the baseline character error on a controlled corpus, and 97.6% of the error caused
+by uneven illumination. Almost all of that gain is attributable to one stage, adaptive
+thresholding, and the gain is conditional&mdash;the same pipeline mildly degrades clean,
+blurred and recompressed pages. Reporting that conditionality, rather than a single average,
+is what makes the result usable: it says to deploy preprocessing behind a quality gate, not
+in front of every page.</p>
+
+<h2 class="refhead">References</h2>
+
+<ol class="refs">
+<li>N. Otsu, "A threshold selection method from gray-level histograms," <em>IEEE Trans. Syst., Man, Cybern.</em>, vol. 9, no. 1, pp. 62&ndash;66, Jan. 1979.</li>
+<li>W. Niblack, <em>An Introduction to Digital Image Processing</em>. Englewood Cliffs, NJ, USA: Prentice-Hall, 1986, pp. 115&ndash;116.</li>
+<li>J. Sauvola and M. Pietik&auml;inen, "Adaptive document image binarization," <em>Pattern Recognit.</em>, vol. 33, no. 2, pp. 225&ndash;236, Feb. 2000.</li>
+<li>I. Pratikakis, K. Zagoris, X. Karagiannis, L. Tsochatzidis, T. Mondal, and I. Marthot-Santaniello, "ICDAR 2019 competition on document image binarization (DIBCO 2019)," in <em>Proc. ICDAR</em>, 2019, pp. 1547&ndash;1556.</li>
+<li>C. Tomasi and R. Manduchi, "Bilateral filtering for gray and color images," in <em>Proc. IEEE Int. Conf. Comput. Vis. (ICCV)</em>, 1998, pp. 839&ndash;846.</li>
+<li>A. Buades, B. Coll, and J.-M. Morel, "A non-local algorithm for image denoising," in <em>Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR)</em>, vol. 2, 2005, pp. 60&ndash;65.</li>
+<li>K. Zuiderveld, "Contrast limited adaptive histogram equalization," in <em>Graphics Gems IV</em>, P. S. Heckbert, Ed. San Diego, CA, USA: Academic Press, 1994, pp. 474&ndash;485.</li>
+<li>H. S. Baird, "The skew angle of printed documents," in <em>Proc. SPSE 40th Annu. Conf. Symp. Hybrid Imaging Syst.</em>, 1987, pp. 21&ndash;24.</li>
+<li>R. Smith, "An overview of the Tesseract OCR engine," in <em>Proc. ICDAR</em>, 2007, pp. 629&ndash;633.</li>
+<li>P. Ye and D. Doermann, "Document image quality assessment: A brief survey," in <em>Proc. ICDAR</em>, 2013, pp. 723&ndash;727.</li>
+<li>A. El Harraj and N. Raissouni, "OCR accuracy improvement on document images through a novel pre-processing approach," <em>arXiv:1509.03456</em>, 2015.</li>
+<li>V. I. Levenshtein, "Binary codes capable of correcting deletions, insertions, and reversals," <em>Soviet Physics Doklady</em>, vol. 10, no. 8, pp. 707&ndash;710, 1966.</li>
+<li>G. Bradski, "The OpenCV library," <em>Dr. Dobb's J. Softw. Tools</em>, vol. 25, no. 11, pp. 120&ndash;125, 2000.</li>
+<li>R. C. Gonzalez and R. E. Woods, <em>Digital Image Processing</em>, 4th ed. New York, NY, USA: Pearson, 2018.</li>
+</ol>
+
+</body>
+</html>
